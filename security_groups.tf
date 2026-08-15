@@ -23,9 +23,7 @@ resource "aws_security_group" "alb" {
   }
 }
 
-# Shared by both app services. Self-referencing rule is what allows
-# coupan-app <-> product-app Service Connect traffic between tasks
-# that both carry this same security group.
+
 resource "aws_security_group" "app" {
   name        = "app-sg"
   description = "Allow inbound from ALB and inter-service traffic"
