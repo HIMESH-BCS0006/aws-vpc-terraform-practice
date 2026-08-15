@@ -44,11 +44,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# --- ADDED: SSM permissions for ECS Exec, attached to the TASK role ---
-# Without this, enable_execute_command tasks can launch fine but
-# `aws ecs execute-command` fails with TargetNotConnectedException,
-# because the in-container SSM agent has no permission to open the
-# control/data channel back to the SSM service.
+
 resource "aws_iam_policy" "ecs_exec_ssm" {
   name = "${var.project_name}-ecs-exec-ssm-policy"
 
@@ -73,7 +69,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_exec_attach" {
   role       = aws_iam_role.ecs_task_role.name
   policy_arn = aws_iam_policy.ecs_exec_ssm.arn
 }
-# --- END ADDED ---
 
 resource "aws_cloudwatch_log_group" "coupan" {
   name              = "/ecs/${var.project_name}/coupan-app"
@@ -85,7 +80,6 @@ resource "aws_cloudwatch_log_group" "product" {
   retention_in_days = 7
 }
 
-# --- coupan-app task + service ---
 resource "aws_ecs_task_definition" "coupan" {
   family                   = "coupan-service"
   requires_compatibilities = ["FARGATE"]
@@ -165,7 +159,6 @@ resource "aws_ecs_service" "coupan" {
   depends_on = [aws_lb_listener.http]
 }
 
-# --- product-app task + service ---
 resource "aws_ecs_task_definition" "product" {
   family                   = "product-app"
   requires_compatibilities = ["FARGATE"]
